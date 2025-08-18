@@ -27,41 +27,65 @@ if __name__ == '__main__':
     task_alter_parent = argparse.ArgumentParser(add_help=False)
     task_alter_parent.add_argument("--task-id", "-t", required=False, help="ID of the task")
 
+    ## CREATE ##
     # 'create' command
-    create_parser = subparsers.add_parser("create", parents=[task_list_parent, task_settings_parent], help="")
+    create_parser = subparsers.add_parser("create", help="Create a task or task list")
     create_subparser = create_parser.add_subparsers(dest="create_type")
-    # create task-list
-    create_task_list_parser = create_subparser.add_parser("task-list")
-    create_task_list_parser.set_defaults(func=create_task_list)
+    # create task list
+    create_list_parser = create_subparser.add_parser(
+        "task-list", parents=[task_list_parent], help="Create a new task list"
+    )
+    create_list_parser.set_defaults(func=create_task_list)
+    # create task
+    create_task_parser = create_subparser.add_parser(
+        "task", parents=[task_list_parent, task_alter_parent, task_settings_parent], help="Create a new task"
+    )
+    create_task_parser.set_defaults(func=create_task)
 
+    ## EDIT ##
     # 'edit' command
-    edit_parser = subparsers.add_parser("edit", parents=[task_list_parent, task_alter_parent, task_settings_parent], help="")
+    edit_parser = subparsers.add_parser("edit", help="Edit a task or task list information")
     edit_subparser = edit_parser.add_subparsers(dest="edit_type")
-    # edit task-list
-    edit_task_list_parser = edit_subparser.add_parser("task-list")
-    edit_task_list_parser.set_defaults(func=edit_task_list)
+    # edit task list
+    edit_list_parser = edit_subparser.add_parser(
+        "task-list", parents=[task_list_parent], help="Edit a task list"
+    )
+    edit_list_parser.set_defaults(func=edit_task_list)
+    # edit task
+    edit_task_parser = edit_subparser.add_parser(
+        "task", parents=[task_list_parent, task_alter_parent, task_settings_parent], help="Edit a task"
+    )
+    edit_task_parser.set_defaults(func=edit_task)
 
+    ## DELETE ##
     # 'delete' command
     delete_parser = subparsers.add_parser("delete", help="Delete tasks or task lists")
     delete_subparser = delete_parser.add_subparsers(dest="delete_type")
     # delete task list
     delete_list_parser = delete_subparser.add_parser(
-        "task-list", parents=[task_list_parent], help="Delete a whole task list"
+        "task-list", parents=[task_list_parent], help="Delete an entire task list"
     )
     delete_list_parser.set_defaults(func=delete_task_list)
-
     # delete task
     delete_task_parser = delete_subparser.add_parser(
-        "task", parents=[task_list_parent, task_alter_parent], help="Delete a specific task"
+        "task", parents=[task_list_parent, task_alter_parent], help="Delete a single task"
     )
     delete_task_parser.set_defaults(func=delete_task)
 
+    ## VIEW ##
     # 'view' command
-    view_parser = subparsers.add_parser("view", parents=[task_list_parent, task_alter_parent], help="")
+    view_parser = subparsers.add_parser("view", help="View a task or task lists")
     view_subparser = view_parser.add_subparsers(dest="view_type")
-    # view task-list
-    view_task_list_parser = view_subparser.add_parser("task-list")
-    view_task_list_parser.set_defaults(func=view_task_list)
+    # view task list
+    view_list_parser = view_subparser.add_parser(
+        "task-list", parents=[task_list_parent], help="View an entire task list"
+    )
+    view_list_parser.set_defaults(func=view_task_list)
+    # view task
+    view_task_parser = view_subparser.add_parser(
+        "task", parents=[task_list_parent, task_alter_parent], help="View a single task"
+    )
+    view_task_parser.set_defaults(func=view_task)
 
     # Parse arguments
     args = parser.parse_args()

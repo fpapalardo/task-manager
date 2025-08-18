@@ -1,3 +1,5 @@
+from models import Task, TaskList
+
 # CLI function calls into class logic
 def delete_task(args):
     pass
