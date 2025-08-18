@@ -1,4 +1,5 @@
 from models import Task, TaskList
+from storage import initial_setup
 
 # CLI function calls into class logic
 def delete_task(args):
@@ -24,3 +25,6 @@ def edit_task(args):
 
 def edit_task_list(args):
     pass
+
+def init_task_manager():
+    initial_setup()
