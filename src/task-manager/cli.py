@@ -7,7 +7,9 @@ from main import (
     # edit functions
     edit_task_list, edit_task,
     # create functions
-    create_task_list, create_task
+    create_task_list, create_task,
+    # init function
+    init_task_manager
     )
 
 if __name__ == '__main__':
@@ -86,6 +88,11 @@ if __name__ == '__main__':
         "task", parents=[task_list_parent, task_alter_parent], help="View a single task"
     )
     view_task_parser.set_defaults(func=view_task)
+    
+    ## INIT ##
+    # 'init' command
+    init_parser = subparsers.add_parser("init", help="Initialize program creating necessary DB and tables")
+    init_parser.set_defaults(func=init_task_manager)
 
     # Parse arguments
     args = parser.parse_args()
