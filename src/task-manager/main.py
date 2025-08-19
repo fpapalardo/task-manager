@@ -12,7 +12,10 @@ def view_task(args):
     pass
 
 def view_task_list(args):
-    pass
+    task_list = TaskList(args.task_list)
+    tasks = task_list.get_tasks()
+    for task in tasks:
+        print(f"[{task.id}] {task.name} (status: {task.status})")
 
 def create_task(args):
     pass
@@ -26,5 +29,8 @@ def edit_task(args):
 def edit_task_list(args):
     pass
 
-def init_task_manager():
+def complete_task(args):
+    pass
+
+def init_task_manager(args):
     initial_setup()

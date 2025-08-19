@@ -9,7 +9,9 @@ from main import (
     # create functions
     create_task_list, create_task,
     # init function
-    init_task_manager
+    init_task_manager,
+    # complete function
+    complete_task
     )
 
 if __name__ == '__main__':
@@ -88,6 +90,16 @@ if __name__ == '__main__':
         "task", parents=[task_list_parent, task_alter_parent], help="View a single task"
     )
     view_task_parser.set_defaults(func=view_task)
+
+    ## COMPLETE ##
+    # 'complete' command
+    complete_parser = subparsers.add_parser("complete", help="Complete task")
+    complete_subparser = complete_parser.add_subparsers(dest="complete_type")
+    # complete task
+    complete_task_parser = complete_subparser.add_parser(
+        "task", parents=[task_list_parent, task_alter_parent], help="Complete a single task"
+    )
+    complete_task_parser.set_defaults(func=complete_task)
     
     ## INIT ##
     # 'init' command
