@@ -63,6 +63,9 @@ def delete_task_list(args):
     task_list.delete()
     print(f"Task list '{task_list.name}' deleted successfully")
 
+def view_all_task_lists(args):
+    pass
+
 def view_task_list(args):
     task_list, error = get_task_list(args.name)
     if error:
@@ -143,6 +146,9 @@ def complete_task(args):
     if error:
         print(f"Error: {error}")
         return
+    
+    task.update({"status": "complete"})
+    print(f"Congratulations on finishing your task")
 
 def init_task_manager(args):
     initial_setup()
