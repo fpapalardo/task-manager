@@ -103,6 +103,34 @@ class TaskList:
         """, (self.id,)).fetchall()
         storage.db_close_connection(con)
         return [Task(*row) for row in rows]
+    
+    @staticmethod
+    def get_all():
+        """Get all task lists with their tasks"""
+        con, cur = storage.db_connection()
+        rows = cur.execute("SELECT id, name FROM task_lists ORDER BY name").fetchall()
+        
+        if not rows:
+            storage.db_close_connection(con)
+            return []
+            
+        task_lists = []
+        for row in rows:
+            task_list = TaskList(row[1], row[0])
+            
+            # Fetch all tasks for this task list
+            tasks = cur.execute("""
+                SELECT id, name, status, due_date, priority, task_list_id
+                FROM tasks
+                WHERE task_list_id=?
+                ORDER BY priority DESC, due_date ASC
+            """, (task_list.id,)).fetchall()
+            
+            task_list.tasks = [Task(*task_row) for task_row in tasks]
+            task_lists.append(task_list)
+        
+        storage.db_close_connection(con)
+        return task_lists
 
     @staticmethod
     def get_by_name(name):

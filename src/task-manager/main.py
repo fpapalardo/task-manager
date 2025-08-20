@@ -64,7 +64,21 @@ def delete_task_list(args):
     print(f"Task list '{task_list.name}' deleted successfully")
 
 def view_all_task_lists(args):
-    pass
+    task_lists = TaskList.get_all()
+    if not task_lists:
+        print("No task lists found")
+        return
+        
+    for task_list in task_lists:
+        print(f"\nTask List: {task_list.name} (ID: {task_list.id})")
+        if not task_list.tasks:
+            print("  No tasks")
+            continue
+            
+        for task in task_list.tasks:
+            due_date = f", Due: {task.due_date}" if task.due_date else ""
+            priority = f", Priority: {task.priority}" if task.priority else ""
+            print(f"  [{task.id}] {task.name} (Status: {task.status}{priority}{due_date})")
 
 def view_task_list(args):
     task_list, error = get_task_list(args.name)
