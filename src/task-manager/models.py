@@ -1,34 +1,49 @@
 import storage
 
 class Task:
+    VALID_PRIORITIES = [None, 'low', 'medium', 'high', '']
+
     def __init__(self, id, name, status, due_date=None, priority=None, task_list_id=None):
         self.id = id
         self.name = name
         self.status = status
         self.due_date = due_date
-        self.priority = priority
+        self.set_priority(priority)
         self.task_list_id = task_list_id
+
+    def set_priority(self, priority):
+        """Set priority if valid or None"""
+        if priority not in self.VALID_PRIORITIES:
+            raise ValueError(f"Invalid priority. Must be one of: none, low, medium, high")
+        self.priority = priority
 
     def save(self):
         con, cur = storage.db_connection()
-        cur.execute(
-            "INSERT INTO tasks (name, status, due_date, priority, task_list_id) VALUES (?, ?, ?, ?, ?)",
-            (self.name, self.status, self.due_date, self.priority, self.task_list_id)
-        )
-        self.id = cur.lastrowid
-        con.commit()
-        storage.db_close_connection(con)
+        try:
+            cur.execute(
+                "INSERT INTO tasks (name, status, due_date, priority, task_list_id) VALUES (?, ?, ?, ?, ?)",
+                (self.name, self.status, self.due_date, self.priority, self.task_list_id)
+            )
+            self.id = cur.lastrowid
+            con.commit()
+        finally:
+            storage.db_close_connection(con)
 
     def update(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
         con, cur = storage.db_connection()
-        cur.execute(
-            "UPDATE tasks SET name=?, status=?, due_date=?, priority=? WHERE id=?",
-            (self.name, self.status, self.due_date, self.priority, self.id)
-        )
-        con.commit()
-        storage.db_close_connection(con)
+        try:
+            for key, value in kwargs.items():
+                if key == 'priority':
+                    self.set_priority(value)
+                else:
+                    setattr(self, key, value)
+            cur.execute(
+                "UPDATE tasks SET name=?, status=?, due_date=?, priority=? WHERE id=?",
+                (self.name, self.status, self.due_date, self.priority, self.id)
+            )
+            con.commit()
+        finally:
+            storage.db_close_connection(con)
 
     def delete(self):
         con, cur = storage.db_connection()
@@ -55,23 +70,28 @@ class TaskList:
 
     def save(self):
         con, cur = storage.db_connection()
-        cur.execute(
-            "INSERT INTO task_lists (name) VALUES (?)", 
-            (self.name,)
-        )
-        self.id = cur.lastrowid
-        con.commit()
-        storage.db_close_connection(con)
+        try:
+            cur.execute(
+                "INSERT INTO task_lists (name) VALUES (?)", 
+                (self.name,)
+            )
+            self.id = cur.lastrowid
+            con.commit()
+        finally:
+            storage.db_close_connection(con)
+            
 
     def update(self, new_name):
         self.name = new_name
         con, cur = storage.db_connection()
-        cur.execute(
-            "UPDATE task_lists SET name=? WHERE id=?",
-            (self.name, self.id)
-        )
-        con.commit()
-        storage.db_close_connection(con)
+        try:
+            cur.execute(
+                "UPDATE task_lists SET name=? WHERE id=?",
+                (self.name, self.id)
+            )
+            con.commit()
+        finally:
+            storage.db_close_connection(con)
 
     def delete(self):
         con, cur = storage.db_connection()
@@ -161,25 +181,26 @@ class TaskList:
     @staticmethod
     def get(id):
         con, cur = storage.db_connection()
-        row = cur.execute(
-            "SELECT id, name FROM task_lists WHERE id=?", 
-            (id,)
-        ).fetchone()
-        
-        if not row:
-            storage.db_close_connection(con)
-            return None
+        try:
+            row = cur.execute(
+                "SELECT id, name FROM task_lists WHERE id=?", 
+                (id,)
+            ).fetchone()
             
-        task_list = TaskList(row[1], row[0])
-        
-        # Fetch all tasks for this task list
-        tasks = cur.execute("""
-            SELECT id, name, status, due_date, priority, task_list_id
-            FROM tasks
-            WHERE task_list_id=?
-            ORDER BY priority DESC, due_date ASC
-        """, (task_list.id,)).fetchall()
-        
-        storage.db_close_connection(con)
-        task_list.tasks = [Task(*task_row) for task_row in tasks]
-        return task_list
+            if not row:
+                return None
+                
+            task_list = TaskList(row[1], row[0])
+            
+            # Fetch all tasks for this task list with consistent ordering
+            tasks = cur.execute("""
+                SELECT id, name, status, due_date, priority, task_list_id
+                FROM tasks
+                WHERE task_list_id=?
+                ORDER BY id ASC
+            """, (task_list.id,)).fetchall()
+            
+            task_list.tasks = [Task(*task_row) for task_row in tasks]
+            return task_list
+        finally:
+            storage.db_close_connection(con)
