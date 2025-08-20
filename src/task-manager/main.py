@@ -55,7 +55,7 @@ def delete_task(args):
     print(f"Task '{task.name}' deleted successfully")
 
 def delete_task_list(args):
-    task_list, error = get_task_list(args.task_list)
+    task_list, error = get_task_list(args.name)
     if error:
         print(f"Error: {error}")
         return
@@ -64,7 +64,7 @@ def delete_task_list(args):
     print(f"Task list '{task_list.name}' deleted successfully")
 
 def view_task_list(args):
-    task_list, error = get_task_list(args.task_list)
+    task_list, error = get_task_list(args.name)
     if error:
         print(f"Error: {error}")
         return
@@ -116,11 +116,27 @@ def edit_task(args):
         print(f"Error: {error}")
         return
 
+    # Build update dict with only provided values
+    updates = {}
+    if hasattr(args, 'priority') and args.priority:
+        updates['priority'] = args.priority
+    if hasattr(args, 'due_date') and args.due_date:
+        updates['due_date'] = args.due_date
+    if hasattr(args, 'name') and args.name:
+        updates['name'] = args.name
+    
+    task.update(**updates)
+    print(f"Task updated successfully")
+
 def edit_task_list(args):
-    task_list, error = get_task_list(args.task_list)
+    print(args)
+    task_list, error = get_task_list(args.name)
     if error:
         print(f"Error: {error}")
         return
+    
+    task_list.update(args.new_name)
+    print(f"Task list renamed to '{args.new_name}' successfully")
 
 def complete_task(args):
     task, error = get_task(args.task_id)
