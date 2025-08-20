@@ -3,7 +3,7 @@ from main import (
     # delete functions
     delete_task_list, delete_task, 
     # view functions
-    view_task_list, view_task,
+    view_task_list, view_task, view_all_task_lists,
     # edit functions
     edit_task_list, edit_task,
     # create functions
@@ -80,6 +80,10 @@ if __name__ == '__main__':
     # view task
     view_task_parser = view_subparser.add_parser("task", parents=[task_id_parent], help="View a single task")
     view_task_parser.set_defaults(func=view_task)
+
+    # view all
+    view_all_task_parser = view_subparser.add_parser("all", help="View all task lists")
+    view_all_task_parser.set_defaults(func=view_all_task_lists)
 
     ## COMPLETE ##
     complete_parser = subparsers.add_parser("complete", help="Complete task")
